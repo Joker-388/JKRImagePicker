@@ -21,7 +21,7 @@
     _asset = asset;
     
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-    options.resizeMode = PHImageRequestOptionsResizeModeFast;
+//    options.resizeMode = PHImageRequestOptionsResizeModeFast; 
     options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
     
     [[PHImageManager defaultManager]
@@ -54,11 +54,11 @@
     }
 }
 
-/// 根据视图大小，等比例计算图像缩放大小
-///
-/// @param image 图像
-///
-/// @return 缩放后的大小
+/**
+ 根据视图大小，等比例计算图像缩放大小
+ @param image 图像
+ @return 缩放后的大小
+ */
 - (CGSize)displaySize:(UIImage *)image {
     CGFloat w = self.view.bounds.size.width;
     CGFloat h = image.size.height * w / image.size.width;

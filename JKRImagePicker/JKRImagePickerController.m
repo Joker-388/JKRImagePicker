@@ -125,10 +125,11 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
 - (void)requestImages:(NSArray <PHAsset *> *)selectedAssets completed:(void (^)(NSArray <UIImage *> *images))completed {
     /// 图像请求选项
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-    // 设置 resizeMode 可以按照指定大小缩放图像
-    options.resizeMode = PHImageRequestOptionsResizeModeFast;
+//    // 设置 resizeMode 可以按照指定大小缩放图像
+//    options.resizeMode = PHImageRequestOptionsResizeModeFast;
     // 设置 deliveryMode 为 HighQualityFormat 可以只回调一次缩放之后的图像，否则会调用多次
     options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    
     // 设置加载图像尺寸(以像素为单位)
     CGSize targetSize = self.targetSize;
     NSMutableArray <UIImage *> *images = [NSMutableArray array];
@@ -139,6 +140,9 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
     NSInteger i = 0;
     for (PHAsset *asset in selectedAssets) {
         dispatch_group_enter(group);
+        if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
+            options.synchronous = YES;
+        } 
         [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
             [images replaceObjectAtIndex:i withObject:result];
             dispatch_group_leave(group);

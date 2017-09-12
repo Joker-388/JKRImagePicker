@@ -47,14 +47,6 @@ static NSString *const JKRAlbumTableViewCellIdentifier = @"JKRAlbumTableViewCell
         }
         _assetCollection = assetCollection;
         [self.tableView reloadData];
-        // 默认显示第一个相册
-        if (_assetCollection.count > 0) {
-            JKRImageGridViewController *grid = [[JKRImageGridViewController alloc]
-                                               initWithAlbum:_assetCollection[0]
-                                               selectedAssets:_selectedAssets
-                                               maxPickerCount:_maxPickerCount];
-            [self.navigationController pushViewController:grid animated:NO];
-        }
     }];
     
     // 设置表格
@@ -96,76 +88,88 @@ static NSString *const JKRAlbumTableViewCellIdentifier = @"JKRAlbumTableViewCell
     // 有所照片
     PHFetchResult *userLibrary = [PHAssetCollection
                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                  subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary
+                                  subtype:PHAssetCollectionSubtypeAny
                                   options:nil];
+    
     [userLibrary enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
+        if (ablum) [result insertObject:ablum atIndex:0];
     }];
     
-    // 最近添加
+    // 我的相簿
     PHFetchResult *userLibrary1 = [PHAssetCollection
-                                  fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                  subtype:PHAssetCollectionSubtypeSmartAlbumRecentlyAdded
+                                  fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                  subtype:PHAssetCollectionSubtypeAny
                                   options:nil];
     [userLibrary1 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
         if (ablum) [result addObject:ablum];
     }];
     
-    // 自拍
-    PHFetchResult *userLibrary2 = [PHAssetCollection
-                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                   subtype:PHAssetCollectionSubtypeSmartAlbumSelfPortraits
-                                   options:nil];
-    [userLibrary2 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
-    }];
     
-    // 屏幕快照
-    PHFetchResult *userLibrary3 = [PHAssetCollection
-                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                   subtype:PHAssetCollectionSubtypeSmartAlbumScreenshots
-                                   options:nil];
-    [userLibrary3 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
-    }];
+//    // 最近添加
+//    PHFetchResult *userLibrary1 = [PHAssetCollection
+//                                  fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
+//                                  subtype:PHAssetCollectionSubtypeSmartAlbumRecentlyAdded
+//                                  options:nil];
+//    [userLibrary1 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
+//    
+//    // 自拍
+//    PHFetchResult *userLibrary2 = [PHAssetCollection
+//                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
+//                                   subtype:PHAssetCollectionSubtypeSmartAlbumSelfPortraits
+//                                   options:nil];
+//    [userLibrary2 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
+//    
+//    // 屏幕快照
+//    PHFetchResult *userLibrary3 = [PHAssetCollection
+//                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
+//                                   subtype:PHAssetCollectionSubtypeSmartAlbumScreenshots
+//                                   options:nil];
+//    [userLibrary3 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
+//    
+//    // 全景
+//    PHFetchResult *userLibrary4 = [PHAssetCollection
+//                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
+//                                   subtype:PHAssetCollectionSubtypeSmartAlbumPanoramas
+//                                   options:nil];
+//    [userLibrary4 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
+//    
+//    // 连拍快照
+//    PHFetchResult *userLibrary6 = [PHAssetCollection
+//                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
+//                                   subtype:PHAssetCollectionSubtypeSmartAlbumBursts
+//                                   options:nil];
+//    [userLibrary6 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
+//    
+//    // 同步相册
+//    PHFetchOptions *options = [[PHFetchOptions alloc] init];
+//    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"localizedTitle" ascending:NO]];
+//    
+//    PHFetchResult *syncedAlbum = [PHAssetCollection
+//                                  fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+//                                  subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum
+//                                  options:options];
     
-    // 全景
-    PHFetchResult *userLibrary4 = [PHAssetCollection
-                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                   subtype:PHAssetCollectionSubtypeSmartAlbumPanoramas
-                                   options:nil];
-    [userLibrary4 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
-    }];
-    
-    // 连拍快照
-    PHFetchResult *userLibrary6 = [PHAssetCollection
-                                   fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                   subtype:PHAssetCollectionSubtypeSmartAlbumBursts
-                                   options:nil];
-    [userLibrary6 enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
-    }];
-    
-    // 同步相册
-    PHFetchOptions *options = [[PHFetchOptions alloc] init];
-    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"localizedTitle" ascending:NO]];
-    
-    PHFetchResult *syncedAlbum = [PHAssetCollection
-                                  fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
-                                  subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum
-                                  options:options];
-    
-    [syncedAlbum enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
-        if (ablum) [result addObject:ablum];
-    }];
+//    [syncedAlbum enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        JKRAlbum  *ablum = [JKRAlbum albumWithAssetCollection:obj];
+//        if (ablum) [result addObject:ablum];
+//    }];
     
     dispatch_async(dispatch_get_main_queue(), ^{ completion(result.copy, NO); });
 }
