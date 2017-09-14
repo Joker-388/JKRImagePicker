@@ -19,6 +19,8 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
 
 @interface JKRImagePickerController ()<JKRImageClipViewControllerDelegate>
 
+@property (nonatomic, assign) PHImageRequestID requestID;
+
 @end
 
 @implementation JKRImagePickerController {
@@ -40,6 +42,11 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
     [self pushViewController:_rootViewController animated:NO];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinishedSelectAssets:) name:JKRImagePickerDidSelectedNotification object:nil];
     return self;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    if (self.requestID) [[PHImageManager defaultManager] cancelImageRequest:self.requestID];
 }
 
 - (void)dealloc {
@@ -125,10 +132,8 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
 - (void)requestImages:(NSArray <PHAsset *> *)selectedAssets completed:(void (^)(NSArray <UIImage *> *images))completed {
     /// 图像请求选项
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-//    // 设置 resizeMode 可以按照指定大小缩放图像
-//    options.resizeMode = PHImageRequestOptionsResizeModeFast;
-    // 设置 deliveryMode 为 HighQualityFormat 可以只回调一次缩放之后的图像，否则会调用多次
     options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    options.networkAccessAllowed = YES;
     
     // 设置加载图像尺寸(以像素为单位)
     CGSize targetSize = self.targetSize;
@@ -138,13 +143,15 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
     }
     dispatch_group_t group = dispatch_group_create();
     NSInteger i = 0;
+    [SVProgressHUD show];
     for (PHAsset *asset in selectedAssets) {
         dispatch_group_enter(group);
-        if (asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive) {
-            options.synchronous = YES;
-        } 
-        [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-            [images replaceObjectAtIndex:i withObject:result];
+        @weakify(self);
+        self.requestID = [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:options resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+            @strongify(self);
+            [SVProgressHUD dismiss];
+            self.requestID = 0;
+            if (result) [images replaceObjectAtIndex:i withObject:result];
             dispatch_group_leave(group);
         }];
         i++;

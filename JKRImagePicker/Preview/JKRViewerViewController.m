@@ -10,6 +10,8 @@
 
 @interface JKRViewerViewController () <UIScrollViewDelegate>
 
+@property (nonatomic, assign) PHImageRequestID requestID;
+
 @end
 
 @implementation JKRViewerViewController {
@@ -17,22 +19,37 @@
     UIImageView *_imageView;
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    if (self.requestID) [[PHImageManager defaultManager] cancelImageRequest:self.requestID];
+}
+
+- (void)dealloc {
+    
+}
+
 - (void)setAsset:(PHAsset *)asset {
     _asset = asset;
     
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-//    options.resizeMode = PHImageRequestOptionsResizeModeFast; 
-    options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
     
-    [[PHImageManager defaultManager]
+    options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    options.networkAccessAllowed = YES;
+    
+    [SVProgressHUD show];
+    self.requestID = [[PHImageManager defaultManager]
      requestImageForAsset:_asset
      targetSize:[UIScreen mainScreen].bounds.size
      contentMode:PHImageContentModeAspectFill
      options:options
      resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-         _imageView.image = result;
-         
-         [self setImageViewPosition];
+         self.requestID = 0;
+         [SVProgressHUD dismiss];
+         if (result) {
+             _imageView.image = result;
+             
+             [self setImageViewPosition];             
+         }
      }];
 }
 
@@ -61,7 +78,7 @@
  */
 - (CGSize)displaySize:(UIImage *)image {
     CGFloat w = self.view.bounds.size.width;
-    CGFloat h = image.size.height * w / image.size.width;
+    CGFloat h = image.size.height * w / ((CGFloat)image.size.width);
     
     return CGSizeMake(w, h);
 }

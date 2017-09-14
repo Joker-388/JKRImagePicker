@@ -36,7 +36,12 @@
 }
 
 - (void)viewDidLoad {
+    self.view.backgroundColor = [UIColor blackColor];
     [super viewDidLoad];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     [self creatUI];
     [self addAllGesture];
 }
