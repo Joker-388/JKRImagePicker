@@ -37,6 +37,7 @@
 
 - (void)viewDidLoad {
     self.view.backgroundColor = [UIColor blackColor];
+    self.view.layer.masksToBounds = YES;
     [super viewDidLoad];
 }
 
