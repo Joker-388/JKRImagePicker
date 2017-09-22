@@ -17,7 +17,7 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
 /// 默认选择图像大小
 #define JKRImagePickerDefaultSize    CGSizeMake(600, 600)
 
-@interface JKRImagePickerController ()<JKRImageClipViewControllerDelegate>
+@interface JKRImagePickerController ()<JKRImageClipViewControllerDelegate, UINavigationControllerDelegate,UIImagePickerControllerDelegate>
 
 @property (nonatomic, assign) PHImageRequestID requestID;
 
@@ -75,6 +75,36 @@ NSString *const JKRImagePickerBundleName = @"JKRImagePicker.bundle";
 
 - (BOOL)allowsEditing {
     return _rootViewController.allowsEditing;
+}
+
+- (void)setCameraSource:(BOOL)cameraSource {
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+        if(authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied) {
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"警告" message:@"未获取相机权限，请在系统设置中授权" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+            [alertController addAction:okAction];
+            [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
+        } else {
+            UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+            imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            imagePicker.delegate = self;
+            imagePicker.allowsEditing = self.allowsEditing;
+            [self addChildViewController:imagePicker];
+            [self.view addSubview:imagePicker.view];
+            [self setNavigationBarHidden:YES animated:NO];
+        }
+    } else {
+        //弹出窗口响应点击事件
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"警告" message:@"未检测到摄像头" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+        [alertController addAction:okAction];
+        [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
+    }
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo {
+    [self.pickerDelegate imagePickerController:self didFinishSelectedImages:@[image] selectedAssets:nil];
 }
 
 #pragma mark - 监听方法

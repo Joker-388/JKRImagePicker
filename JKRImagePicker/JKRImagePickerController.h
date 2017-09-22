@@ -42,7 +42,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGSize targetSize;
 /// 最大选择图像数量，默认 9 张
 @property (nonatomic) NSInteger maxPickerCount;
-
+/// 是否从相机获取图片，如果选择YES则只返回一张图片，maxPickerCount失效，默认为NO
+@property (nonatomic, assign) BOOL cameraSource;
+/// 裁剪选择的图片，maxPickerCount=1或者从相机获取图片时生效，如果同时从相机获取图片，这个参数要在cameraSource之前设置，默认为NO
 @property (nonatomic, assign) BOOL allowsEditing;
 
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
